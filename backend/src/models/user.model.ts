@@ -6,6 +6,7 @@ export interface IUser {
   password?: string;
   authProvider: "local" | "google";
   refreshToken?: string;
+  googleId?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -32,6 +33,10 @@ const userSchema = new Schema<IUser>(
     refreshToken: {
       type: String,
     },
+    googleId: {
+      type: String,
+      unique: true,
+    },  
   },
   { timestamps: true }
 );
