@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { PredictionCard } from "@/components/PredictionCard";
 import { PredictionModal } from "@/components/PredictionModal";
 
+
 const predictionCategories = [
   { id: "love", icon: "❤️", title: "Future Love Life", description: "Including your future spouse's country" },
   { id: "networth", icon: "💰", title: "Future Net Worth", description: "How wealthy will you be?" },
