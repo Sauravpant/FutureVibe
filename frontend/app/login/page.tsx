@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,19 +8,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
+import toast from "react-hot-toast";
+import { api } from "@/lib/axios";
+import { AuthContext } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const router = useRouter();
+
+  const { login, loading } = useContext(AuthContext);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt:", { email, password });
   };
 
   const handleGoogleLogin = () => {
     console.log("Google login");
+  };
+
+  const handleManualLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await api.post("/auth/login", { email, password });
+      console.log(response.data);
+      login({ name: response.data.data.name, email });
+      toast.success(response.data.message || "Login Successful");
+      router.push("/");
+    } catch (err: any) {
+      toast.error(err?.reponse?.data?.message || "Failed to login");
+    }
   };
 
   return (
@@ -30,7 +50,7 @@ export default function LoginPage() {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-2 h-2 bg-[#D4AF37] rounded-full animate-pulse"></div>
         <div className="absolute top-40 right-20 w-1 h-1 bg-[#D4AF37] rounded-full animate-pulse delay-100"></div>
-        <div className="absolute bottom-32 left-1/4 w-1.5 h-1.5 bg-[#D4AF37] rounded-full animate-pulse delay-200"></div>
+        <div className="absolute bottom-32 left-1/4 w-1.5 h-1.5 bg-gold rounded-full animate-pulse delay-200"></div>
         <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-[#D4AF37] rounded-full animate-pulse delay-300"></div>
       </div>
 
@@ -99,6 +119,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
+                onClick={handleManualLogin}
                 className="w-full h-12 bg-gradient-to-r from-[#D4AF37] to-[#E5C55C] hover:from-[#E5C55C] hover:to-[#D4AF37] text-[#0A1A2F] font-bold text-lg shadow-lg hover:shadow-xl transition-all cursor-pointer"
               >
                 Log In
