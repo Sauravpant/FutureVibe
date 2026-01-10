@@ -8,26 +8,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
+import { AuthContext } from "@/context/AuthContext";
+import { api } from "@/lib/axios";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
 export default function SignUpPage() {
-  
-  const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Sign up attempt:", { name, email, password });
   };
 
-  const handleGoogleSignUp = () => {
-    console.log("Google signup");
+  const handleSignUp = async () => {
+    try {
+      const response = await api.post("/auth/register", { name, email, password });
+      toast.success(response.data.message || "Registration successfully");
+      router.push("/login");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Registration failed. Try again");
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center home-bg relative overflow-hidden px-4 py-8">
-      <div className="absolute inset-0 bg-[#0A1A2F]/70"></div>
-
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-2 h-2 bg-[#D4AF37] rounded-full animate-pulse"></div>
         <div className="absolute top-40 right-20 w-1 h-1 bg-[#D4AF37] rounded-full animate-pulse delay-100"></div>
@@ -112,6 +121,7 @@ export default function SignUpPage() {
 
               <Button
                 type="submit"
+                onClick={handleSignUp}
                 className="w-full h-12 bg-gradient-to-r from-[#D4AF37] to-[#E5C55C] hover:from-[#E5C55C] hover:to-[#D4AF37] text-[#0A1A2F] font-bold text-lg shadow-lg hover:shadow-xl transition-all cursor-pointer cursor-pointer"
               >
                 Sign Up
@@ -126,12 +136,7 @@ export default function SignUpPage() {
                 </div>
               </div>
 
-              <Button
-                type="button"
-                onClick={handleGoogleSignUp}
-                variant="outline"
-                className="w-full h-12 border-gray-300 hover:bg-gray-50 font-semibold cursor-pointer"
-              >
+              <Button type="button" variant="outline" className="w-full h-12 border-gray-300 hover:bg-gray-50 font-semibold cursor-pointer">
                 <FcGoogle className="w-5 h-5 mr-2" />
                 Continue with Google
               </Button>
