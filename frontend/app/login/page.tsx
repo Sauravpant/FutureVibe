@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  const { login, loading } = useContext(AuthContext);
+  const { login, loading } = useContext(AuthContext)!;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
