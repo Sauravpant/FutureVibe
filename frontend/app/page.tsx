@@ -122,7 +122,7 @@ export default function HomePage() {
   const selectedCategoryData = predictionCategories.find(c => c.id === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A1A2F] via-[#132843] to-[#0A1A2F]">
+    <div className="min-h-screen bg-gradient-to-br from-[#0A1A2F] via-[#132843] to-[#0A1A2F] home-bg">
       <Navbar />
 
       <main className="pt-24 pb-16 px-4">

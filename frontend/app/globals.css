@@ -96,6 +96,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'Nunito', sans-serif;
@@ -106,17 +107,27 @@
   .gold-glow {
     box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
   }
+
   .gold-glow-hover:hover {
     box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
   }
+
   .card-shadow {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   }
+
   .text-gradient-gold {
     background: linear-gradient(135deg, #D4AF37 0%, #E5C55C 50%, #D4AF37 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .home-bg {
+    background-image: url('/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 }
 
