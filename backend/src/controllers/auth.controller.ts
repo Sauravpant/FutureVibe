@@ -63,15 +63,18 @@ export const loginWithGoogle = asyncHandler(async (req: Request, res: Response) 
   if (!token) {
     throw new AppError(400, "Token is missing");
   }
-  const ticket = await googleClient.verifyIdToken({
-    idToken: token,
-    audience: process.env.GOOGLE_CLIENT_ID,
-  });
 
-  const payload = ticket.getPayload();
-  if (!payload) {
+  const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`);
+
+  if (!response.ok) {
     throw new AppError(400, "Invalid Google token");
   }
+
+  const payload = await response.json();
+  if (!payload || !payload.email) {
+    throw new AppError(400, "Invalid Google token");
+  }
+
   const { email, name, sub } = payload;
   let user = await User.findOne({ email });
   if (user && user.authProvider === "local") {
