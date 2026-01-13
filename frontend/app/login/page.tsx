@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { api } from "@/lib/axios";
 import { AuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useGoogleLogin } from "@react-oauth/google";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,15 +21,37 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  const { login, loading } = useContext(AuthContext)!;
+  const { login } = useContext(AuthContext)!;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Google login");
-  };
+  const googleLogin = useGoogleLogin({
+    flow: "implicit",
+    onSuccess: async (tokenResponse) => {
+      try {
+        // Send Google token to backend
+        const response = await api.post("/auth/login/google", {
+          token: tokenResponse.access_token,
+        });
+        const data = response.data.data;
+        login({
+          name: data.name,
+          email: data.email,
+        });
+
+        toast.success(response.data.message || "Google login successful");
+        router.replace("/");
+      } catch (err: any) {
+        toast.error(err?.response?.data?.message || "Google login failed");
+      }
+    },
+
+    onError: () => {
+      toast.error("Google authentication failed");
+    },
+  });
 
   const handleManualLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,7 +159,7 @@ export default function LoginPage() {
 
               <Button
                 type="button"
-                onClick={handleGoogleLogin}
+                onClick={() => googleLogin()}
                 variant="outline"
                 className="w-full h-12 border-gray-300 hover:bg-gray-50  font-semibold cursor-pointer"
               >

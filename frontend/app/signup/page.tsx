@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { api } from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useGoogleLogin } from "@react-oauth/google";
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -20,6 +21,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState<string>("");
 
   const router = useRouter();
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +36,32 @@ export default function SignUpPage() {
       toast.error(err?.response?.data?.message || "Registration failed. Try again");
     }
   };
+
+  const googleLogin = useGoogleLogin({
+    flow: "implicit",
+    onSuccess: async (tokenResponse) => {
+      try {
+        // Send Google token to backend
+        const response = await api.post("/auth/login/google", {
+          token: tokenResponse.access_token,
+        });
+        const data = response.data.data;
+        login({
+          name: data.name,
+          email: data.email,
+        });
+
+        toast.success(response.data.message || "Google login successful");
+        router.replace("/");
+      } catch (err: any) {
+        toast.error(err?.response?.data?.message || "Google login failed");
+      }
+    },
+
+    onError: () => {
+      toast.error("Google authentication failed");
+    },
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center home-bg relative overflow-hidden px-4 py-8">
@@ -136,7 +164,12 @@ export default function SignUpPage() {
                 </div>
               </div>
 
-              <Button type="button" variant="outline" className="w-full h-12 border-gray-300 hover:bg-gray-50 font-semibold cursor-pointer">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => googleLogin()}
+                className="w-full h-12 border-gray-300 hover:bg-gray-50 font-semibold cursor-pointer"
+              >
                 <FcGoogle className="w-5 h-5 mr-2" />
                 Continue with Google
               </Button>
