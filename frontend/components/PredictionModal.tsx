@@ -1,13 +1,14 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, RotateCcw, Twitter, Facebook, Instagram } from "lucide-react";
+import { X, RotateCcw, Facebook, Instagram, MessageCircle } from "lucide-react";
 
 interface PredictionModalProps {
   isOpen: boolean;
   onClose: () => void;
   isGenerating: boolean;
   prediction: string | null;
+  predictionImage?: string | null;
   category: { icon: string; title: string } | null;
   onRegenerate: () => void;
   onShare: (platform: string) => void;
@@ -18,6 +19,7 @@ export function PredictionModal({
   onClose,
   isGenerating,
   prediction,
+  predictionImage,
   category,
   onRegenerate,
   onShare,
@@ -65,6 +67,16 @@ export function PredictionModal({
               </div>
             ) : (
               <>
+                {predictionImage && (
+                  <div className="mb-6 rounded-2xl overflow-hidden shadow-lg border border-gray-100 bg-gray-50">
+                    <img
+                      src={predictionImage}
+                      alt="Prediction"
+                      className="w-full h-48 md:h-64 object-cover"
+                    />
+                  </div>
+                )}
+
                 <div className="bg-gradient-to-br from-[#0A1A2F] to-[#132843] rounded-2xl p-6 mb-6">
                   <p className="text-white text-lg leading-relaxed">{prediction}</p>
                 </div>
@@ -87,26 +99,29 @@ export function PredictionModal({
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => onShare("twitter")}
-                      className="p-3 rounded-full bg-[#0A1A2F] text-[#D4AF37] hover:bg-[#132843] transition-colors"
+                      onClick={() => onShare("facebook")}
+                      className="p-3 rounded-full bg-[#1877F2] text-white hover:bg-[#1877F2]/90 transition-colors shadow-lg"
+                      title="Share on Facebook"
                     >
-                      <Twitter className="w-5 h-5" />
+                      <Facebook className="w-6 h-6" />
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => onShare("facebook")}
-                      className="p-3 rounded-full bg-[#0A1A2F] text-[#D4AF37] hover:bg-[#132843] transition-colors"
+                      onClick={() => onShare("whatsapp")}
+                      className="p-3 rounded-full bg-[#25D366] text-white hover:bg-[#25D366]/90 transition-colors shadow-lg"
+                      title="Share on WhatsApp"
                     >
-                      <Facebook className="w-5 h-5" />
+                      <MessageCircle className="w-6 h-6" />
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => onShare("instagram")}
-                      className="p-3 rounded-full bg-[#0A1A2F] text-[#D4AF37] hover:bg-[#132843] transition-colors"
+                      className="p-3 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white hover:opacity-90 transition-opacity shadow-lg"
+                      title="Share on Instagram"
                     >
-                      <Instagram className="w-5 h-5" />
+                      <Instagram className="w-6 h-6" />
                     </motion.button>
                   </div>
                 </div>
