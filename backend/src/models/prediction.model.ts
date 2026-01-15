@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 export interface IPrediction {
   user: Schema.Types.ObjectId;
+  categoryId: string;
   predictionText: string;
   isPublic: boolean;
   viewsCount: number;
@@ -14,6 +15,10 @@ const predictionSchema = new Schema(
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+    },
+    categoryId: {
+      type: String,
       required: true,
     },
     predictionText: {
