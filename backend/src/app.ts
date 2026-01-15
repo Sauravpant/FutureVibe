@@ -29,8 +29,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 import authRoutes from "./routes/auth.routes";
+import predictionRoutes from "./routes/prediction.routes";
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/prediction", predictionRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ status: 404, message: "Route not found" });
