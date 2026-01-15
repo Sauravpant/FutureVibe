@@ -2,17 +2,21 @@
 
 import { useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import toast, { Toaster } from "react-hot-toast";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PredictionCard } from "@/components/PredictionCard";
 import { PredictionModal } from "@/components/PredictionModal";
 import { AuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { predictionCategories, predictionResults } from "@/data/data";
+import { predictionCategories } from "@/data/data";
+import { api } from "@/lib/axios";
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<string | null>(null);
+  const [predictionImage, setPredictionImage] = useState<string | null>(null);
+  const [predictionId, setPredictionId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const router = useRouter();
@@ -24,21 +28,33 @@ export default function HomePage() {
     }
   }, [loading, isAuthenticated, router]);
 
-  const generatePrediction = (categoryId: string) => {
+  const generatePrediction = async (categoryId: string) => {
     setIsGenerating(true);
     setSelectedCategory(categoryId);
+    setPrediction(null);
+    setPredictionImage(null);
 
-    setTimeout(() => {
-      const results = predictionResults[categoryId];
-      const randomPrediction = results[Math.floor(Math.random() * results.length)];
-      setPrediction(randomPrediction);
+    try {
+      const response = await api.post("/prediction/get-prediction", { categoryId });
+      const data = response.data.data;
+
+      setTimeout(() => {
+        setPrediction(data.predictionText);
+        setPredictionImage(data.imageUrl || null);
+        setPredictionId(data.id);
+        setIsGenerating(false);
+      }, 1500);
+    } catch (error) {
+      console.error("Error generating prediction:", error);
       setIsGenerating(false);
-    }, 1500);
+    }
   };
 
   const closePrediction = () => {
     setSelectedCategory(null);
     setPrediction(null);
+    setPredictionImage(null);
+    setPredictionId(null);
   };
 
   const regenerate = () => {
@@ -48,23 +64,46 @@ export default function HomePage() {
   };
 
   const share = (platform: string) => {
-    const text = `✨ My FutureVibe Prediction: ${prediction} \n\nGet your prediction at FutureVibe!`;
-    const url = encodeURIComponent(window.location.href);
-    const encodedText = encodeURIComponent(text);
+    if (!predictionId) return;
 
-    const urls: Record<string, string> = {
-      twitter: `https://twitter.com/intent/tweet?text=${encodedText}&url=${url}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${encodedText}`,
-      instagram: `https://www.instagram.com/`,
-    };
+    const shareUrl = `${window.location.origin}/share/${predictionId}`;
+    const encodedUrl = encodeURIComponent(shareUrl);
+    const shareText = `✨ My FutureVibe Prediction!`;
 
-    window.open(urls[platform], "_blank");
+    api.put(`/prediction/share/${predictionId}`).catch(console.error);
+
+    switch (platform) {
+      case "instagram":
+        navigator.clipboard
+          .writeText(shareUrl)
+          .then(() => toast.success("Link copied! Share on Instagram"))
+          .catch(() => toast.error(" Unable to copy link. Please try again."));
+        break;
+
+      case "whatsapp":
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`;
+        window.open(waUrl, "_blank");
+        break;
+
+      case "facebook":
+        const fbUrl = `https://m.me/?link=${encodedUrl}`;
+        window.open(fbUrl, "_blank", "width=600,height=500");
+        toast.success("Link copied! Share on Facebook");
+        break;
+
+      default:
+        navigator.clipboard
+          .writeText(shareUrl)
+          .then(() => toast.success("Link copied! 🔗"))
+          .catch(() => toast.error(" Unable to copy link. Please try again."));
+    }
   };
 
   const selectedCategoryData = predictionCategories.find((c) => c.id === selectedCategory);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A1A2F] via-[#132843] to-[#0A1A2F] home-bg">
+      <Toaster position="top-center" />
       <Navbar />
 
       <main className="pt-24 pb-16 px-4">
@@ -117,6 +156,7 @@ export default function HomePage() {
         onClose={closePrediction}
         isGenerating={isGenerating}
         prediction={prediction}
+        predictionImage={predictionImage}
         category={selectedCategoryData || null}
         onRegenerate={regenerate}
         onShare={share}
